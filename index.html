@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prince of Mulberry Productions</title>
+  <meta name="description" content="A new production company. Coming soon.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cormorant+SC:wght@300;400&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --cream:      #e6dfd4;
+      --cream-dim:  rgba(230, 223, 212, 0.45);
+      --cream-faint:rgba(230, 223, 212, 0.18);
+      --gold:       #c5a46a;
+      --gold-dim:   rgba(197, 164, 106, 0.3);
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background: #000;
+      color: var(--cream);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Background video ── */
+    .bg-video {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    /* ── Vignette overlay ── */
+    .vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background:
+        radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.72) 100%),
+        linear-gradient(
+          to bottom,
+          rgba(0,0,0,0.62) 0%,
+          rgba(0,0,0,0.08) 25%,
+          rgba(0,0,0,0.08) 72%,
+          rgba(0,0,0,0.72) 100%
+        );
+      pointer-events: none;
+    }
+
+    /* ── Film grain canvas ── */
+    #grain {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.07;
+      mix-blend-mode: overlay;
+    }
+
+    /* ── UI shell ── */
+    .ui {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(1.75rem, 4vw, 3rem);
+    }
+
+    /* ── Top: wordmark ── */
+    .top {
+      display: flex;
+      justify-content: center;
+    }
+
+    .wordmark-block {
+      text-align: center;
+      opacity: 0;
+      animation: riseIn 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+    }
+
+    .wordmark {
+      font-family: 'Cormorant SC', serif;
+      font-weight: 300;
+      font-size: clamp(0.68rem, 1.4vw, 0.82rem);
+      letter-spacing: 0.44em;
+      color: var(--cream);
+      text-transform: uppercase;
+    }
+
+    .wordmark-rule {
+      width: 1px;
+      height: 1.8rem;
+      background: linear-gradient(to bottom, var(--gold-dim), transparent);
+      margin: 0.9rem auto 0;
+    }
+
+    /* ── Center: heading ── */
+    .center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 1.2rem;
+      text-align: center;
+    }
+
+    .coming-soon {
+      font-size: clamp(4rem, 11vw, 9.5rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 0.95;
+      letter-spacing: -0.015em;
+      color: var(--cream);
+      opacity: 0;
+      animation: riseIn 2s cubic-bezier(0.22, 1, 0.36, 1) 0.9s forwards;
+    }
+
+    .year-mark {
+      font-family: 'Cormorant SC', serif;
+      font-weight: 300;
+      font-size: clamp(0.65rem, 1.3vw, 0.78rem);
+      letter-spacing: 0.62em;
+      color: var(--gold);
+      opacity: 0;
+      animation: riseIn 2s cubic-bezier(0.22, 1, 0.36, 1) 1.3s forwards;
+    }
+
+    /* ── Bottom: controls ── */
+    .bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+    }
+
+    /* Sound toggle */
+    .sound-btn {
+      background: none;
+      border: 1px solid var(--gold-dim);
+      color: var(--cream-dim);
+      padding: 0.5rem 0.85rem;
+      cursor: pointer;
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      transition: border-color 0.35s, color 0.35s;
+      opacity: 0;
+      animation: riseIn 1.6s cubic-bezier(0.22, 1, 0.36, 1) 2s forwards;
+      line-height: 1;
+    }
+
+    .sound-btn:hover {
+      border-color: var(--gold);
+      color: var(--cream);
+    }
+
+    .sound-btn svg {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Email signup */
+    .signup {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.55rem;
+      opacity: 0;
+      animation: riseIn 1.6s cubic-bezier(0.22, 1, 0.36, 1) 1.7s forwards;
+    }
+
+    .signup-label {
+      font-family: 'Cormorant SC', serif;
+      font-weight: 300;
+      font-size: 0.54rem;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+    }
+
+    .signup-form {
+      display: flex;
+      border: 1px solid var(--gold-dim);
+      backdrop-filter: blur(4px);
+      transition: border-color 0.35s;
+    }
+
+    .signup-form:focus-within {
+      border-color: rgba(197, 164, 106, 0.65);
+    }
+
+    .signup-form input {
+      background: rgba(0, 0, 0, 0.35);
+      border: none;
+      outline: none;
+      padding: 0.55rem 1rem;
+      color: var(--cream);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.88rem;
+      font-style: italic;
+      letter-spacing: 0.04em;
+      width: 13rem;
+    }
+
+    .signup-form input::placeholder {
+      color: var(--cream-faint);
+    }
+
+    .signup-form button {
+      background: transparent;
+      border: none;
+      border-left: 1px solid var(--gold-dim);
+      padding: 0.55rem 0.85rem;
+      color: var(--gold);
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.54rem;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.35s, color 0.35s;
+    }
+
+    .signup-form button:hover:not(:disabled) {
+      background: rgba(197, 164, 106, 0.1);
+      color: var(--cream);
+    }
+
+    .signup-form button:disabled {
+      cursor: default;
+      color: var(--cream-dim);
+    }
+
+    /* ── Keyframes ── */
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 580px) {
+      .bottom {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.1rem;
+      }
+      .signup { align-items: center; width: 100%; }
+      .signup-form { width: 100%; max-width: 20rem; }
+      .signup-form input { flex: 1; width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <video class="bg-video" id="bgVideo" autoplay muted loop playsinline>
+    <source src="teaser_v1.mp4" type="video/mp4">
+  </video>
+
+  <div class="vignette"></div>
+  <canvas id="grain"></canvas>
+
+  <div class="ui">
+
+    <!-- Wordmark -->
+    <div class="top">
+      <div class="wordmark-block">
+        <div class="wordmark">Prince of Mulberry Productions</div>
+        <div class="wordmark-rule"></div>
+      </div>
+    </div>
+
+    <!-- Coming Soon -->
+    <div class="center">
+      <h1 class="coming-soon">Coming Soon</h1>
+      <div class="year-mark">MMXXVI</div>
+    </div>
+
+    <!-- Controls -->
+    <div class="bottom">
+
+      <button class="sound-btn" id="soundBtn" onclick="toggleSound()" aria-label="Toggle sound">
+        <!-- Speaker icon (muted state) -->
+        <svg id="iconMuted" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+          <line x1="23" y1="9" x2="17" y2="15"/>
+          <line x1="17" y1="9" x2="23" y2="15"/>
+        </svg>
+        <!-- Speaker icon (sound-on state, hidden initially) -->
+        <svg id="iconOn" viewBox="0 0 24 24" aria-hidden="true" style="display:none">
+          <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        </svg>
+        <span id="soundLabel">Sound Off</span>
+      </button>
+
+      <div class="signup">
+        <div class="signup-label">Stay Informed</div>
+        <form class="signup-form" id="signupForm" onsubmit="handleSignup(event)" novalidate>
+          <input type="email" id="emailInput" placeholder="your email address" autocomplete="email">
+          <button type="submit" id="signupBtn">Notify Me</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ── Sound toggle ──────────────────────────────────────────
+    const video = document.getElementById('bgVideo');
+    let muted = true;
+
+    video.play().catch(() => {});
+
+    function toggleSound() {
+      muted = !muted;
+      video.muted = muted;
+      document.getElementById('iconMuted').style.display = muted ? '' : 'none';
+      document.getElementById('iconOn').style.display    = muted ? 'none' : '';
+      document.getElementById('soundLabel').textContent  = muted ? 'Sound Off' : 'Sound On';
+    }
+
+    // ── Film grain ────────────────────────────────────────────
+    (function () {
+      const canvas = document.getElementById('grain');
+      const ctx    = canvas.getContext('2d');
+      let W, H;
+
+      function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize, { passive: true });
+      resize();
+
+      let last = 0;
+      function tick(ts) {
+        if (ts - last > 85) {
+          last = ts;
+          const img = ctx.createImageData(W, H);
+          const d   = img.data;
+          for (let i = 0; i < d.length; i += 4) {
+            const v = (Math.random() * 255) | 0;
+            d[i] = d[i + 1] = d[i + 2] = v;
+            d[i + 3] = 255;
+          }
+          ctx.putImageData(img, 0, 0);
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    })();
+
+    // ── Email signup ──────────────────────────────────────────
+    function handleSignup(e) {
+      e.preventDefault();
+      const input = document.getElementById('emailInput');
+      const btn   = document.getElementById('signupBtn');
+      if (!input.value || !input.value.includes('@')) return;
+      btn.textContent  = 'Thank You';
+      btn.disabled     = true;
+      input.disabled   = true;
+      input.style.opacity = '0.35';
+    }
+  </script>
+
+</body>
+</html>
