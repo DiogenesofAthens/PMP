@@ -382,15 +382,41 @@
     })();
 
     // ── Email signup ──────────────────────────────────────────
-    function handleSignup(e) {
+    async function handleSignup(e) {
       e.preventDefault();
       const input = document.getElementById('emailInput');
       const btn   = document.getElementById('signupBtn');
-      if (!input.value || !input.value.includes('@')) return;
-      btn.textContent  = 'Thank You';
-      btn.disabled     = true;
-      input.disabled   = true;
-      input.style.opacity = '0.35';
+      const email = (input.value || '').trim();
+      if (!email || !email.includes('@')) return;
+
+      // Optimistic UI
+      btn.textContent = '…';
+      btn.disabled    = true;
+      input.disabled  = true;
+
+      try {
+        const res = await fetch('/api/subscribe', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email }),
+        });
+
+        if (res.ok) {
+          btn.textContent     = 'Thank You';
+          input.style.opacity = '0.35';
+        } else {
+          const data = await res.json().catch(() => ({}));
+          btn.textContent = 'Try Again';
+          btn.disabled    = false;
+          input.disabled  = false;
+          console.error('Signup error:', data.error || res.status);
+        }
+      } catch (err) {
+        btn.textContent = 'Try Again';
+        btn.disabled    = false;
+        input.disabled  = false;
+        console.error('Signup network error:', err);
+      }
     }
   </script>
 
