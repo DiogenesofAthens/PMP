@@ -6,10 +6,23 @@
 
 const NOTIFY_EMAIL = "kwessman@gmail.com"
 
-// Use the verified Resend shared domain until princeofmulberry.com is verified
-// in your Resend workspace (Settings → Domains → Add Domain).
-// Once verified, swap this back to: "Prince of Mulberry <noreply@princeofmulberry.com>"
-const FROM_ADDRESS = "Prince of Mulberry <onboarding@resend.dev>"
+// ─── Domain status ────────────────────────────────────────────────────────────
+// princeofmulberry.com is NOT yet verified in Resend (Settings → Domains).
+// Until it is, Resend is in test mode: it can only send to NOTIFY_EMAIL.
+//
+// Current behaviour (test mode):
+//   • Subscriber sees "Thank You" on the form  ✓
+//   • Owner gets a notification at NOTIFY_EMAIL for every signup  ✓
+//   • Subscriber confirmation email is suppressed  ✗ (re-enable below once verified)
+//
+// To re-enable subscriber confirmations:
+//   1. Verify princeofmulberry.com in resend.com/domains
+//   2. Flip DOMAIN_VERIFIED to true
+// ─────────────────────────────────────────────────────────────────────────────
+const DOMAIN_VERIFIED = false
+const FROM_ADDRESS    = DOMAIN_VERIFIED
+  ? "Prince of Mulberry <noreply@princeofmulberry.com>"
+  : "Prince of Mulberry <onboarding@resend.dev>"
 
 export default async function handler(req, res) {
   // CORS — allow requests from princeofmulberry.com and local dev
@@ -45,7 +58,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Confirmation to subscriber
+    // 1. Confirmation to subscriber (suppressed until princeofmulberry.com is verified)
+    if (DOMAIN_VERIFIED) {
     await sendEmail(apiKey, {
       from: FROM_ADDRESS,
       to: email,
@@ -70,8 +84,9 @@ export default async function handler(req, res) {
         </div>
       `,
     })
+    } // end if (DOMAIN_VERIFIED)
 
-    // 2. Internal alert
+    // 2. Internal alert — always send (owner email works in test mode)
     await sendEmail(apiKey, {
       from: FROM_ADDRESS,
       to: NOTIFY_EMAIL,
@@ -82,7 +97,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true })
   } catch (err) {
     console.error("[pmp/subscribe] Resend error:", err.message)
-    return res.status(500).json({ error: "Failed to subscribe. Please try again.", detail: err.message })
+    return res.status(500).json({ error: "Failed to subscribe. Please try again." })
   }
 }
 
