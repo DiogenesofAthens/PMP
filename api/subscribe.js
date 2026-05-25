@@ -5,7 +5,11 @@
  */
 
 const NOTIFY_EMAIL = "kwessman@gmail.com"
-const FROM_ADDRESS = "Prince of Mulberry <noreply@princeofmulberry.com>"
+
+// Use the verified Resend shared domain until princeofmulberry.com is verified
+// in your Resend workspace (Settings → Domains → Add Domain).
+// Once verified, swap this back to: "Prince of Mulberry <noreply@princeofmulberry.com>"
+const FROM_ADDRESS = "Prince of Mulberry <onboarding@resend.dev>"
 
 export default async function handler(req, res) {
   // CORS — allow requests from princeofmulberry.com and local dev
