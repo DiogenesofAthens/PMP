@@ -81,8 +81,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ ok: true })
   } catch (err) {
-    console.error("[pmp/subscribe] Resend error:", err)
-    return res.status(500).json({ error: "Failed to subscribe. Please try again." })
+    console.error("[pmp/subscribe] Resend error:", err.message)
+    return res.status(500).json({ error: "Failed to subscribe. Please try again.", detail: err.message })
   }
 }
 
