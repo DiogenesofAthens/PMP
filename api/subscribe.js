@@ -50,9 +50,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Invalid email address" })
   }
 
-  const apiKey = process.env.RESEND_API_KEY
+  const apiKey = process.env.resend_api_key_steveb
   if (!apiKey) {
-    // Dev fallback — succeed silently so the form works without keys locally
+    // Dev fallback — succeed silently so the form works without keys locally (set resend_api_key_steveb to enable)
     console.log(`[pmp/subscribe] DEV — would subscribe: ${email}`)
     return res.status(200).json({ ok: true })
   }
